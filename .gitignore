@@ -1,0 +1,21 @@
+node_modules/
+npm-debug.log
+yarn-error.log
+.env
+.DS_Store
+/build
+/dist
+coverage/
+logs/
+*.log
+*.tsbuildinfo
+
+# Ignore editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore dependency lock files (optional, unless you want to commit them)
+package-lock.json
+yarn.lock
