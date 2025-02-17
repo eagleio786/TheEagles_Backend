@@ -3,7 +3,7 @@ const { readFromContract, IdtoAdress } = require("./Worker");
 const { UserProfile, User } = require("./Database");
 
 
-export const ProfileCreation = async (req, res) => {
+ const ProfileCreation = async (req, res) => {
   try {
     const lastUser = await UserProfile.findOne().sort({ id: -1 });
 
