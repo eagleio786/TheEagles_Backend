@@ -35,7 +35,7 @@ app.get('/get24hrsUSDT',Function.getLast24HoursUSDT)
 
 
 
-setInterval(Worker.WorkerFun, 120000);
+// setInterval(Worker.WorkerFun, 120000);
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
