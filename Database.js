@@ -2,9 +2,9 @@ const mongoose = require('mongoose');
 const UserProfileSchema = new mongoose.Schema({
   id: { type: String, unique: true },
   name: { type: String,  },
-  email: { type: String,   },
+  email: { type: String, unique: false },
   description: { type: String },
-  walletAdress: { type: String, required: true ,unique: true},
+  walletAddress: { type: String, required: true ,unique: true},
   socialLinks: {
     facebook: { type: String },
     youtube: { type: String },

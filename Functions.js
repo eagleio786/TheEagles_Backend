@@ -61,13 +61,24 @@ const UpdateProfile = async (req, res) => {
 
     // Check if the user profile exists
     const existingUser = await UserProfile.findOne({ walletAddress });
-
+    let updatedProfile;
     if (!existingUser) {
-      return res.status(404).json({ message: "Profile not found!" });
+      const newUser = await UserProfile.create({ walletAddress });
+
+
+      console.log("newUser",newUser);
+      
+      updatedProfile = await UserProfile.findOneAndUpdate(
+        { walletAddress:newUser.walletAddress },
+        { $set: req.body }, // Update fields from request body
+        { new: true } // Return the updated document
+      );
+
+      // return res.status(404).json({ message: "Profile not found!" });
     }
 
     // Update the user profile
-    const updatedProfile = await UserProfile.findOneAndUpdate(
+    updatedProfile = await UserProfile.findOneAndUpdate(
       { walletAddress },
       { $set: req.body }, // Update fields from request body
       { new: true } // Return the updated document
@@ -100,6 +111,7 @@ const ProfileCreation = async (req, res) => {
     const newUserProfile = new UserProfile({
       ...req.body,
       id: newId.toString(),
+      walletAddress: req.body.walletAddress,
     });
 
     await newUserProfile.save();
@@ -141,7 +153,7 @@ const getUserByWalletAddress = async (req, res) => {
   const { walletAddress } = req.params;
   try {
     const user = await UserProfile.findOne({
-      walletAdress: walletAddress,
+      walletAddress: walletAddress,
     }).select("-_id -__v");
 
     console.log("kashif is a good boy", user);
