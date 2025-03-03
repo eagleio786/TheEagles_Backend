@@ -1,12 +1,10 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const UserProfileSchema = new mongoose.Schema({
   id: { type: String, unique: true },
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
+  name: { type: String,  },
+  email: { type: String,   },
   description: { type: String },
-  walletAdress: { type: String, required: true },
-  refferalAdress: { type: String }, // Changed from Server to String
-  image: { type: String },
+  walletAdress: { type: String, required: true ,unique: true},
   socialLinks: {
     facebook: { type: String },
     youtube: { type: String },
@@ -15,7 +13,6 @@ const UserProfileSchema = new mongoose.Schema({
     whatsapp: { type: String },
   },
 });
-
 const userSchema = new mongoose.Schema(
   {
     referrer: {
@@ -31,27 +28,23 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    currentLevel: {
-      type: Number,
-      required: true,
-    },
     currentX1Level: {
       type: Number,
-      required: true,
+      // required: true,
     },
     currentX2Level: {
       type: Number,
-      required: true,
+      // required: true,
     },
     totalUSDTReceived: {
-      type: mongoose.Schema.Types.Decimal128, // Supports large numbers
+      type: String, // Supports large numbers
       default: 0,
     },
-    TotalReferred: { type: [Number], default: [] }, // all childs 
+    TotalReferred: { type: [Number], default: [] }, // all childs
   },
   { timestamps: true }
 );
 
-const User = mongoose.model("User", userSchema);
-const UserProfile = mongoose.model("UserProfile", UserProfileSchema);
+const User = mongoose.model('User', userSchema);
+const UserProfile = mongoose.model('UserProfile', UserProfileSchema);
 module.exports = { UserProfile, User };
