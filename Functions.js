@@ -104,9 +104,13 @@ const ProfileCreation = async (req, res) => {
         data: existingUser,
       });
     }
-    const lastUser = await UserProfile.findOne().sort({ id: -1 });
-
+    // const lastUser = await UserProfile.findOne().sort({ id: -1 });
+    const lastUser = await UserProfile.findOne()
+    .sort({ id: -1 })
+    .collation({ locale: "en", numericOrdering: true });
+  
     const newId = lastUser && lastUser.id ? Number(lastUser.id) + 1 : 1;
+console.log("ID for new user is ",newId,lastUser);
 
     const newUserProfile = new UserProfile({
       ...req.body,
