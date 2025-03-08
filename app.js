@@ -55,6 +55,6 @@ app.get("/getAllUsers", Function.getAllUsers);
 app.use(errorHandler); // Use the correct middleware function
 
 // Worker function
-// setInterval(Worker.WorkerFun, 9000);
+setInterval(Worker.WorkerFun, 9000);
 // Start the server
 app.listen(port, () => console.log(`Server running on port ${port}`));
