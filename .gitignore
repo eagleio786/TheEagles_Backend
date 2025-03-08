@@ -17,5 +17,4 @@ logs/
 *.swo
 
 # Ignore dependency lock files (optional, unless you want to commit them)
-package-lock.json
 yarn.lock
