@@ -28,7 +28,7 @@ connectToMongo();
 
 // Routes
 app.get("/", (req, res) => {
-  res.send("Welcome to the Blockchain User Sync API!");
+  res.send("Welcome to the Blockchain User API!");
 });
 app.post("/api/profile", Function.ProfileCreation);
 app.post('/profile-upgradation',Function.UpdateProfile)
