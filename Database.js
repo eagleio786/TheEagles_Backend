@@ -1,10 +1,11 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const UserProfileSchema = new mongoose.Schema({
   id: { type: String, unique: true },
-  name: { type: String,  },
+  name: { type: String },
+  profileImage: { type: String },
   email: { type: String, unique: false },
   description: { type: String },
-  walletAddress: { type: String, required: true ,unique: true},
+  walletAddress: { type: String, required: true, unique: true },
   socialLinks: {
     facebook: { type: String },
     youtube: { type: String },
@@ -45,6 +46,6 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const User = mongoose.model('User', userSchema);
-const UserProfile = mongoose.model('UserProfile', UserProfileSchema);
+const User = mongoose.model("User", userSchema);
+const UserProfile = mongoose.model("UserProfile", UserProfileSchema);
 module.exports = { UserProfile, User };

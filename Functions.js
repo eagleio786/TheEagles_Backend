@@ -65,7 +65,7 @@ const UpdateProfile = async (req, res) => {
     if (!existingUser) {
       const newUser = await UserProfile.create({ walletAddress });
 
-
+      
       console.log("newUser",newUser);
       
       updatedProfile = await UserProfile.findOneAndUpdate(
@@ -73,9 +73,10 @@ const UpdateProfile = async (req, res) => {
         { $set: req.body }, // Update fields from request body
         { new: true } // Return the updated document
       );
-
+      
       // return res.status(404).json({ message: "Profile not found!" });
     }
+    console.log("kashif ",req.body);
 
     // Update the user profile
     updatedProfile = await UserProfile.findOneAndUpdate(
@@ -97,6 +98,7 @@ const ProfileCreation = async (req, res) => {
     const existingUser = await UserProfile.findOne({
       walletAddress: req.body.walletAddress,
     });
+console.log("kashif ",req.body.Image);
 
     if (existingUser) {
       return res.status(400).json({
@@ -160,7 +162,7 @@ const getUserByWalletAddress = async (req, res) => {
       walletAddress: walletAddress,
     }).select("-_id -__v");
 
-    console.log("kashif is a good boy", user);
+    // console.log("kashif is a good boy", user,walletAddress);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -244,12 +246,12 @@ const UserRefferalData = async (req, resp) => {
       createdAt: { $gte: last24Hours },
     });
 
-    console.log(
-      "Total Partners:",
-      totalPartners,
-      "Last 24hrs Partners:",
-      last24hrsPartners
-    );
+    // console.log(
+    //   "Total Partners:",
+    //   totalPartners,
+    //   "Last 24hrs Partners:",
+    //   last24hrsPartners
+    // );
 
     const team = await User.findOne().sort({ id: -1 });
     const totalTeamMembers = team.id - ID;
