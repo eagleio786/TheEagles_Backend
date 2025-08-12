@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=ADLaM+Display&display=swap');
+
+/* Reset default styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Apply the ADLaM Display font to the body */
+body {
+  font-family: 'ADLaM Display', sans-serif;
+  background-color: black;
+}
+
+/* Example styles for gradient borders and backgrounds */
+.gradient-border {
+  background: linear-gradient(to right, #aba9bf, #a67912, #aba9bf, #dc0cc8);
+  padding: 4px;
+  display: inline-block;
+}
+
+.bg-image {
+  position: relative;
+}
+
+.bg-image::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/assets/LandingImages/tether.png'),
+    url('/assets/LandingImages/tether.png');
+  background-position: 180px -52px, 60px 30px;
+  background-repeat: no-repeat, no-repeat;
+  opacity: 0.05;
+  z-index: 1;
+}
+
+.bg-person2 {
+  background-image: url('/assets/HomeImages/TwoPerson.png');
+  background-position: 45px 50px;
+  background-repeat: no-repeat;
+}
+
+.bg-person3 {
+  background-image: url('/assets/HomeImages/ThreePerson.png');
+  background-position: 20px 50px;
+  background-repeat: no-repeat;
+}
+
+.gradient-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: conic-gradient(#08EDFD, #9853E0 95%);
+  box-sizing: border-box;
+}
+
+.hexagon {
+  clip-path: polygon(50% 0, 100% 20%, 100% 80%, 50% 100%, 0 80%, 0 20%);
+}
+
+.backgroundimg {
+  background-image: url('/assets/LandingImages/world.png');
+  height: 45vh;
+  width: 100%;
+  background-size: 75%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.homebg>* {
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes quickAlert {
+  0% {
+    opacity: 0;
+    transform: translateX(50px) scale(0.95);
+  }
+
+  20% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(50px) scale(0.95);
+  }
+}
+
+.animate-quickAlert {
+  animation: quickAlert 2s ease-in-out forwards;
+}
+
+.bg-img {
+  background-size: contain;
+  background-image: url('./assets/icons/userImg.png');
+}
+.bg-img-X3 {
+  background-size: contain;
+  background-image: url('../public/Frame.png');
+}
