@@ -1,478 +1,427 @@
-const { request } = require("express");
-const { readFromContract, IdtoAdress } = require("./Worker");
-const { UserProfile, User } = require("./Database");
-const { v4: uuidv4 } = require("uuid");
+const { UserProfile, notifications } = require("./Database");
+const { ethers } = require("ethers");
+const rpcUrl = "https://bsc-mainnet.infura.io/v3/f5778e9c8b764c2eb60678ad73f25586";
+const eventName = "FundsDistributed";
+const { abi, contractAddress, X3DiamondAbi, X3DiamondAddress } = require("./exports");
+const { Transaction } = require("ethers");
+// const UpdateProfile = async (req, res) => {
+//   try {
+//     const { walletAddress } = req.body; // Assuming walletAddress is unique
 
-const getCompleteReferralChain = async (req, res) => {
-  const { ID } = req.params;
+//     // Check if the user profile exists
+//     const existingUser = await UserProfile.findOne({ walletAddress });
+//     let updatedProfile;
+//     if (!existingUser) {
+//       const newUser = await UserProfile.create({ walletAddress });
 
-  try {
-    const rootUser = await User.findOne({ id: ID }).select("-_id -__v");
+//       console.log("newUser", newUser);
 
-    if (!rootUser) {
-      return res.status(404).json({ message: "User not found" });
-    }
+//       updatedProfile = await UserProfile.findOneAndUpdate(
+//         { walletAddress: newUser.walletAddress },
+//         { $set: req.body }, // Update fields from request body
+//         { new: true } // Return the updated document
+//       );
 
-    const fetchReferralChain = async (userIds, chain = new Set()) => {
-      if (!Array.isArray(userIds) || userIds.length === 0) {
-        return [];
-      }
+//       // return res.status(404).json({ message: "Profile not found!" });
+//     }
+//     console.log("kashif ", req.body);
 
-      const referredUsers = await User.find({ id: { $in: userIds } }).select(
-        "-_id -__v"
-      );
+//     // Update the user profile
+//     updatedProfile = await UserProfile.findOneAndUpdate(
+//       { walletAddress },
+//       { $set: req.body }, // Update fields from request body
+//       { new: true } // Return the updated document
+//     );
 
-      referredUsers.forEach((user) => {
-        chain.add(user.id);
-      });
+//     res.status(200).json({
+//       message: "Profile updated successfully!",
+//       data: updatedProfile,
+//     });
+//   } catch (error) {
+//     res
+//       .status(500)
+//       .json({ message: "Error updating profile", error: error.message });
+//   }
+// };
+// const ProfileCreation = async (req, res) => {
+//   try {
+//     const existingUser = await UserProfile.findOne({
+//       walletAddress: req.body.walletAddress,
+//     });
+//     console.log("kashif ", req.body.Image);
 
-      const nextLevelIds = referredUsers
-        .filter((user) => Array.isArray(user.TotalReferred))
-        .flatMap((user) => user.TotalReferred);
+//     if (existingUser) {
+//       return res.status(400).json({
+//         message: "Profile already exists!",
+//         data: existingUser,
+//       });
+//     }
+//     // const lastUser = await UserProfile.findOne().sort({ id: -1 });
+//     const lastUser = await UserProfile.findOne()
+//       .sort({ id: -1 })
+//       .collation({ locale: "en", numericOrdering: true });
 
-      await fetchReferralChain(nextLevelIds, chain);
+//     const newId = lastUser && lastUser.id ? Number(lastUser.id) + 1 : 1;
+//     console.log("ID for new user is ", newId, lastUser);
 
-      return Array.from(chain);
-    };
+//     const newUserProfile = new UserProfile({
+//       ...req.body,
+//       id: newId.toString(),
+//       walletAddress: req.body.walletAddress,
+//     });
 
-    const referralChainIds = await fetchReferralChain(rootUser.TotalReferred);
+//     await newUserProfile.save();
 
-    const referralChain = await User.find({
-      id: { $in: referralChainIds },
-    }).select("-_id -__v");
+//     res.status(201).json({
+//       message: "User profile created successfully!",
+//       data: newUserProfile,
+//     });
+//   } catch (error) {
+//     res
+//       .status(500)
+//       .json({ message: "Error inserting data", error: error.message });
+//   }
+// };
+// const getSingleUserProfile = async (req, res) => {
+//   const { walletAddress } = req.params;
+//   console.log(walletAddress);
+//   try {
+//     const userProfile = await UserProfile.findOne({
+//       walletAddress: walletAddress,
+//     }).select("-_id -__v");
 
-    res.status(200).json({
-      message: "Complete referral chain fetched successfully",
-      data: {
-        user: rootUser,
-        referralChain,
-      },
-    });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching referral chain", error: error.message });
-  }
-};
+//     if (!userProfile) {
+//       return res.status(404).json({ message: "User profile not found" });
+//     }
+
+//     res.status(200).json({
+//       message: "User profile found successfully!",
+//       data: userProfile,
+//     });
+//   } catch (error) {
+//     res
+//       .status(500)
+
+//       .json({ message: "Error fetching data", error: error.message });
+//   }
+// };
 
 const UpdateProfile = async (req, res) => {
   try {
-    const { walletAddress } = req.body; // Assuming walletAddress is unique
+    const { walletAddress, ...updateData } = req.body;
+
+    if (!walletAddress) {
+      return res.status(400).json({ 
+        message: "Wallet address is required" 
+      });
+    }
+
+    console.log('Update request for wallet:', walletAddress);
+    console.log('Update data:', updateData);
 
     // Check if the user profile exists
     const existingUser = await UserProfile.findOne({ walletAddress });
-    let updatedProfile;
-    if (!existingUser) {
-      const newUser = await UserProfile.create({ walletAddress });
 
-      
-      console.log("newUser",newUser);
-      
-      updatedProfile = await UserProfile.findOneAndUpdate(
-        { walletAddress:newUser.walletAddress },
-        { $set: req.body }, // Update fields from request body
-        { new: true } // Return the updated document
-      );
-      
-      // return res.status(404).json({ message: "Profile not found!" });
+    if (!existingUser) {
+      return res.status(404).json({ 
+        message: "Profile not found. Please create a profile first." 
+      });
     }
-    console.log("kashif ",req.body);
 
     // Update the user profile
-    updatedProfile = await UserProfile.findOneAndUpdate(
+    const updatedProfile = await UserProfile.findOneAndUpdate(
       { walletAddress },
-      { $set: req.body }, // Update fields from request body
-      { new: true } // Return the updated document
+      { 
+        $set: {
+          ...updateData,
+          updatedAt: new Date() // Add timestamp
+        }
+      },
+      { 
+        new: true,
+        runValidators: true // Run schema validators
+      }
     );
+
+    if (!updatedProfile) {
+      return res.status(500).json({ 
+        message: "Failed to update profile" 
+      });
+    }
 
     res.status(200).json({
       message: "Profile updated successfully!",
       data: updatedProfile,
     });
+
   } catch (error) {
-    res.status(500).json({ message: "Error updating profile", error: error.message });
+    console.error('Error updating profile:', error);
+    
+    // Handle specific errors
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        message: "Validation error",
+        error: error.message
+      });
+    }
+
+    if (error.code === 11000) {
+      return res.status(400).json({
+        message: "Duplicate entry error",
+        error: "Profile with this wallet address already exists"
+      });
+    }
+
+    res.status(500).json({ 
+      message: "Internal server error", 
+      error: error.message 
+    });
   }
 };
+
 const ProfileCreation = async (req, res) => {
+
+  console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+  
   try {
-    const existingUser = await UserProfile.findOne({
-      walletAddress: req.body.walletAddress,
-    });
-console.log("kashif ",req.body.Image);
+  const {walletAddress}=req.params
+    const {  ...profileData } = req.body;
+
+    if (!walletAddress) {
+      return res.status(400).json({ 
+        message: "Wallet address is required" 
+      });
+    }
+
+    console.log('Create profile request for wallet:', walletAddress);
+    console.log('Profile data:', profileData);
+
+    // Check if profile already exists
+    const existingUser = await UserProfile.findOne({ walletAddress });
 
     if (existingUser) {
       return res.status(400).json({
-        message: "Profile already exists!",
+        message: "Profile already exists for this wallet address!",
         data: existingUser,
       });
     }
-    // const lastUser = await UserProfile.findOne().sort({ id: -1 });
-    const lastUser = await UserProfile.findOne()
-    .sort({ id: -1 })
-    .collation({ locale: "en", numericOrdering: true });
-  
-    const newId = lastUser && lastUser.id ? Number(lastUser.id) + 1 : 1;
-console.log("ID for new user is ",newId,lastUser);
 
+    // Get the next ID
+    const lastUser = await UserProfile.findOne()
+      .sort({ id: -1 })
+      .collation({ locale: "en", numericOrdering: true });
+
+    const newId = lastUser && lastUser.id ? Number(lastUser.id) + 1 : 1;
+    console.log("New user ID:", newId);
+
+    // Create new profile
     const newUserProfile = new UserProfile({
-      ...req.body,
+      ...profileData,
       id: newId.toString(),
-      walletAddress: req.body.walletAddress,
+      walletAddress,
+      createdAt: new Date(),
+      updatedAt: new Date()
     });
 
-    await newUserProfile.save();
+    const savedProfile = await newUserProfile.save();
 
     res.status(201).json({
       message: "User profile created successfully!",
-      data: newUserProfile,
+      data: savedProfile,
     });
+
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error inserting data", error: error.message });
-  }
-};
-const getSingleUserProfile = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const userProfile = await UserProfile.findOne({ id: id }).select(
-      "-_id -__v"
-    );
+    console.error('Error creating profile:', error);
 
-    if (!userProfile) {
-      return res.status(404).json({ message: "User profile not found" });
-    }
-
-    res.status(200).json({
-      message: "User profile found successfully!",
-      data: userProfile,
-    });
-  } catch (error) {
-    res
-      .status(500)
-
-      .json({ message: "Error fetching data", error: error.message });
-  }
-};
-
-const getUserByWalletAddress = async (req, res) => {
-  const { walletAddress } = req.params;
-  try {
-    const user = await UserProfile.findOne({
-      walletAddress: walletAddress,
-    }).select("-_id -__v");
-
-    // console.log("kashif is a good boy", user,walletAddress);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    // const contractData = await readFromContract(walletAddress);
-    // console.log("contractData", contractData);
-
-    res.status(200).json({
-      message: "User found successfully",
-      data: user,
-      // contractData: contractData,
-    });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching user data", error: error.message });
-  }
-};
-
-// const UserRefferalData = async (req, resp) => {
-//   try {
-//     const { ID } = req.params;
-//     if (!ID) {
-//       return resp.status(400).json({ message: "User ID is required" });
-//     }
-
-//     const Useradress = await IdtoAdress(ID);
-//     const partners = await User.countDocuments({ referrer: Useradress });
-//     console.log("Partners are ", partners);
-
-//     const team = await User.findOne().sort({ id: -1 });
-//     const TeamMembers = team.id - ID;
-
-//     const user = await User.findOne({ id: ID });
-//     if (!user) {
-//       return resp.status(404).json({ message: "User not found" });
-//     }
-
-//     let val = user.referrer;
-//     const Reffrer = await User.findOne({ referrer: val });
-//     if (!Reffrer) {
-//       return resp.status(404).json({
-//         message: "Referrer not found",
-//         Partner: partners,
-//         Team: TeamMembers,
-//         UplineAdress: null,
-//       });
-//     }
-
-//     const UlineAdress = await User.findOne({ Personal: Reffrer.referrer });
-
-//     return resp.status(200).json({
-//       message: "User found successfully",
-//       Partner: partners,
-//       Team: TeamMembers,
-//       UplineAdress: UlineAdress ? UlineAdress.Personal : null,
-//     });
-
-//   } catch (error) {
-//     return resp.status(500).json({
-//       message: "Error fetching user data",
-//       error: error.message,
-//     });
-//   }
-// };
-const UserRefferalData = async (req, resp) => {
-  try {
-    const { ID } = req.params;
-    if (!ID) {
-      return resp.status(400).json({ message: "User ID is required" });
-    }
-
-    const Useradress = await IdtoAdress(ID);
-
-    const last24Hours = new Date();
-    last24Hours.setHours(last24Hours.getHours() - 24);
-
-    const totalPartners = await User.countDocuments({ referrer: Useradress });
-
-    const last24hrsPartners = await User.countDocuments({
-      referrer: Useradress,
-      createdAt: { $gte: last24Hours },
-    });
-
-    // console.log(
-    //   "Total Partners:",
-    //   totalPartners,
-    //   "Last 24hrs Partners:",
-    //   last24hrsPartners
-    // );
-
-    const team = await User.findOne().sort({ id: -1 });
-    const totalTeamMembers = team.id - ID;
-
-    const last24hrsTeam = await User.countDocuments({
-      id: { $gt: ID },
-      createdAt: { $gte: last24Hours },
-    });
-
-    const user = await User.findOne({ id: ID });
-    if (!user) {
-      return resp.status(404).json({ message: "User not found" });
-    }
-
-    let val = user.referrer;
-    const Reffrer = await User.findOne({ referrer: val });
-
-    if (!Reffrer) {
-      return resp.status(404).json({
-        message: "Referrer not found",
-        TotalPartners: totalPartners,
-        Last24hrsPartners: last24hrsPartners,
-        TotalTeamMembers: totalTeamMembers,
-        Last24hrsTeamMembers: last24hrsTeam,
-        UplineAdress: null,
+    // Handle specific errors
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        message: "Validation error",
+        error: error.message
       });
     }
 
-    const UplineAdress = await User.findOne({ Personal: Reffrer.referrer });
-
-    return resp.status(200).json({
-      message: "User found successfully",
-      TotalPartners: totalPartners,
-      Last24hrsPartners: last24hrsPartners,
-      TotalTeamMembers: totalTeamMembers,
-      Last24hrsTeamMembers: last24hrsTeam,
-      UplineAdress: UplineAdress ? UplineAdress.Personal : null,
-    });
-  } catch (error) {
-    return resp.status(500).json({
-      message: "Error fetching user data",
-      error: error.message,
-    });
-  }
-};
-
-const getAllUsers = async (req, res) => {
-  try {
-    const users = await User.find();
-    res.status(200).json({
-      message: "All users fetched successfully",
-      data: users,
-    });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching user data", error: error.message });
-  }
-};
-
-const getUserByPersonalAddress = async (req, res) => {
-  const { personalAddress } = req.params;
-  try {
-    const user = await User.findOne({ Personal: personalAddress });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    res.status(200).json({
-      message: "User found successfully",
-      data: user,
-    });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching user data", error: error.message });
-  }
-};
-
-const TotalDataApi = async (req, res) => {
-  const { ID } = req.params;
-  try {
-    const now = new Date();
-    const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    const totalUsers = await User.countDocuments();
-    const recentUsers = await User.countDocuments({
-      createdAt: { $gte: last24Hours },
-    });
-    const team = await User.findOne().sort({ id: -1 });
-    const TeamMembers = team ? team.id - ID : 0;
-    const allUsers = await User.find(
-      {},
-      { totalUSDTReceived: 1, createdAt: 1 }
-    );
-    let totalUSDT = 0;
-    let last24HoursUSDT = 0;
-    for (let i = 0; i < allUsers.length; i++) {
-      const user = allUsers[i];
-      const amount = parseFloat(user.totalUSDTReceived.toString());
-      totalUSDT += amount;
-      if (user.createdAt >= last24Hours) {
-        last24HoursUSDT += amount;
-      }
-    }
-    return res.status(200).json({
-      message: "User data fetched successfully",
-      data: {
-        totalUsers,
-        recentUsers,
-        totalUSDT,
-        last24HoursUSDT,
-      },
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: "Error fetching user data",
-      error: error.message,
-    });
-  }
-};
-
-const fetchReferredUsers = async (req, res) => {
-  const { ID } = req.params;
-  try {
-    // Find the parent user
-    const user = await User.findOne({ id: ID }).select("-_id -__v");
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    const referredIds = user.TotalReferred;
-    if (!Array.isArray(referredIds) || referredIds.length === 0) {
-      return res.status(200).json({
-        message: "User has no referrals",
-        data: user,
-        referredUsers: [],
+    if (error.code === 11000) {
+      return res.status(400).json({
+        message: "Profile already exists for this wallet address!",
+        error: "Duplicate wallet address"
       });
     }
-    console.log("this si a data ", referredIds);
 
-    const referredUsers = await User.find({ id: { $in: referredIds } }).select(
-      "-_id -__v"
+    // Handle image size errors (if you're using express file upload middleware)
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({
+        message: "Image file too large",
+        error: "Please select an image under 1MB"
+      });
+    }
+
+    res.status(500).json({ 
+      message: "Internal server error", 
+      error: error.message 
+    });
+  }
+};
+
+// Optional: Get profile by wallet address
+const GetProfile = async (req, res) => {
+  try {
+    const { walletAddress } = req.params;
+
+    if (!walletAddress) {
+      return res.status(400).json({ 
+        message: "Wallet address is required" 
+      });
+    }
+
+    const profile = await UserProfile.findOne({ walletAddress });
+
+    if (!profile) {
+      return res.status(404).json({ 
+        message: "Profile not found" 
+      });
+    }
+
+    res.status(200).json({
+      message: "Profile retrieved successfully",
+      data: profile
+    });
+
+  } catch (error) {
+    console.error('Error retrieving profile:', error);
+    res.status(500).json({ 
+      message: "Internal server error", 
+      error: error.message 
+    });
+  }
+};
+
+
+
+
+
+let isListening = false;
+
+function listenToContractEvent() {
+  return async function (callback) {
+    if (isListening) {
+      console.log("⚠️ Already listening to contract event");
+      return;
+    }
+ try {
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+      const contract = new ethers.Contract(X3DiamondAddress, X3DiamondAbi, provider);
+
+      contract.on(eventName, async (...args) => {
+        const eventObj = args[args.length - 1];
+        const eventArgs = args.slice(0, -1);
+
+        console.log(`📢 [${eventName}] Event emitted:`, eventArgs);
+        console.log("event object", eventObj);
+
+        try {
+          const tx = await notifications.create({
+            from: eventArgs[0],
+            to: eventArgs[1],
+            amount: Number(eventArgs[3]),
+            level: Number(eventArgs[2]).toString(),
+            seen: false,
+          });
+          console.log("✅ Event saved:", tx);
+        } catch (saveErr) {
+          console.error("❌ Error saving:", saveErr);
+        }
+
+        if (typeof callback === "function") {
+          callback(eventArgs, eventObj);
+        }
+      });
+
+      isListening = true;
+    } catch (err) {
+      console.error("❌ Error setting up listener for X3:", err);
+    }
+    try {
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+      const contract = new ethers.Contract(contractAddress, abi, provider);
+
+      contract.on(eventName, async (...args) => {
+        const eventObj = args[args.length - 1];
+        const eventArgs = args.slice(0, -1);
+
+        console.log(`📢 [${eventName}] Event emitted:`, eventArgs);
+        console.log("event object", eventObj);
+
+        try {
+          const tx = await notifications.create({
+            from: eventArgs[0],
+            to: eventArgs[1],
+            amount: Number(eventArgs[4]),
+            matrix: Number(eventArgs[2]).toString(),
+            level: Number(eventArgs[3]).toString(),
+            seen: false,
+          });
+          console.log("✅ Event saved:", tx);
+        } catch (saveErr) {
+          console.error("❌ Error saving:", saveErr);
+        }
+
+        if (typeof callback === "function") {
+          callback(eventArgs, eventObj);
+        }
+      });
+
+      isListening = true;
+    } catch (err) {
+      console.error("❌ Error setting up listener for X1/X2:", err);
+    }
+  };
+}
+const updateByWallet = async (req, res) => {
+  try {
+    const { walletAddress } = req.params; 
+
+    // Update all documents where "from" matches
+    const result = await notifications.updateMany(
+      { to: walletAddress },             // match condition
+      { $set: { seen: true } }    // change field
     );
 
-    res.status(200).json({
-      message: "User and referred users found successfully",
-      data: user,
-      referredUsers: referredUsers,
+    res.json({
+      message: "Updated successfully",
+      matched: result.matchedCount,
+      modified: result.modifiedCount,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching user data", error: error.message });
+    console.error(error);
+    res.status(500).json({ error: "Something went wrong" });
   }
 };
 
-const getLast24HoursUSDT = async (req, res) => {
-  // console.log("in function");
+const getAllTrans = async (req, resp) => {
+ try {
+  const entries = await notifications
+    .find({})
+    .sort({ createdAt: -1 }) // newest first
+    .limit(20);              // only top 20
 
-  try {
-    const twentyFourHoursAgo = new Date();
-    twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+  resp.status(200).json(entries);
+} catch (error) {
+  console.error(error);
+  resp.status(500).json({
+    error: "Something went wrong while getting transactions",
+  });
+}
 
-    const usersLast24Hours = await User.find({
-      updatedAt: { $gte: twentyFourHoursAgo },
-    });
-
-    const allUsers = await User.find();
-
-    const totalUSDTLast24Hours = usersLast24Hours.reduce((sum, user) => {
-      return sum + parseFloat(user.totalUSDTReceived.toString());
-    }, 0);
-
-    const totalUSDTAllTime = allUsers.reduce((sum, user) => {
-      return sum + parseFloat(user.totalUSDTReceived.toString());
-    }, 0);
-
-    res.status(200).json({
-      message: "Total USDT received statistics",
-      totalUSDTReceivedLast24Hours: totalUSDTLast24Hours,
-      totalUSDTReceivedAllTime: totalUSDTAllTime,
-      totalUsers: allUsers.length,
-    });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching data", error: error.message });
-  }
 };
 
-const getUserEarningsLast24Hrs = async (req,res) => {
-  const { userAddress } = req.params;
-  try {
-    const twentyFourHoursAgo = new Date();
-    twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
 
-    // Find earnings of a specific user updated in the last 24 hours
-    const user = await User.findOne({
-      Personal: userAddress,
-      updatedAt: { $gte: twentyFourHoursAgo },
-    });
-
-    const earnings = user ? user.totalUSDTReceived : 0;
-    console.log(`User ${userAddress} Earnings in Last 24 Hours: ${earnings} USDT`);
-    return earnings;
-  } catch (error) {
-    console.error("Error fetching user earnings:", error);
-  }
-};
 
 module.exports = {
+    UpdateProfile,
   ProfileCreation,
-  getUserByWalletAddress,
-  getSingleUserProfile,
-  getLast24HoursUSDT,
-  fetchReferredUsers,
-  UserRefferalData,
-  TotalDataApi,
-  UpdateProfile,
-  getCompleteReferralChain,
-  getUserByPersonalAddress,
-  getAllUsers,
-  getUserEarningsLast24Hrs
+  GetProfile,
+  listenToContractEvent,
+  getAllTrans,
+  updateByWallet,
 };

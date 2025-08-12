@@ -45,7 +45,39 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+const transactionSchema = new mongoose.Schema(
+  {
+    from: {
+      type: String,
+    },
+    to: {
+      type: String,
+    },
+    amount: {
+      type: Number,
+      min: 0,
+    },
+    matrix: {
+      type: Number,
+      min: 0,
+    },
+    level: {
+      type: Number,
+      min: 0,
+    },
+    seen: {
+      type: Boolean,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
+
+
+transactionSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 });
+const notifications = mongoose.model("Transaction", transactionSchema);
 const User = mongoose.model("User", userSchema);
 const UserProfile = mongoose.model("UserProfile", UserProfileSchema);
-module.exports = { UserProfile, User };
+module.exports = { UserProfile, User, notifications };
