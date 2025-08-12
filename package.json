@@ -1,57 +1,25 @@
 {
-  "name": "blockchain",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
-  },
+  "name": "XDale",
+  "version": "1.0.0",
+  "description": "not required",
+  "main": "app.js",
+  "license": "MIT",
   "dependencies": {
-    "@apollo/client": "^3.13.1",
-    "@rainbow-me/rainbowkit": "2",
-    "@reduxjs/toolkit": "^2.6.1",
-    "@tanstack/react-query": "^5.66.11",
-    "@web3modal/react": "^2.7.1",
-    "axios": "^1.7.9",
-    "blockchain": "file:",
-    "browser-image-compression": "^2.0.2",
-    "buffer": "^6.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "ethers": "^6.13.5",
-    "firebase": "^11.5.0",
-    "graphql": "^16.10.0",
-    "lucide-react": "^0.522.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-icons": "^5.4.0",
-    "react-redux": "^9.2.0",
-    "react-router-dom": "^7.1.1",
-    "react-toastify": "^11.0.3",
-    "redux-persist": "^6.0.0",
-    "swiper": "^11.2.1",
-    "viem": "^2.23.12",
-    "wagmi": "^2.14.15",
-    "yarn": "^1.22.22"
+    "express": "^4.21.1",
+    "mongoose": "^8.8.1",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.16",
+    "nodemon": "^3.1.10",
+    "path": "^0.12.7",
+    "socket.io": "^4.8.1",
+    "uuid": "^11.1.0",
+    "viem": "^2.23.2"
   },
-  "devDependencies": {
-    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
-    "@eslint/js": "^9.17.0",
-    "@types/react": "^18.3.18",
-    "@types/react-dom": "^18.3.5",
-    "@vitejs/plugin-react": "^4.3.4",
-    "autoprefixer": "^10.4.20",
-    "eslint": "^9.17.0",
-    "eslint-plugin-react": "^7.37.2",
-    "eslint-plugin-react-hooks": "^5.0.0",
-    "eslint-plugin-react-refresh": "^0.4.16",
-    "globals": "^15.14.0",
-    "postcss": "^8.5.1",
-    "tailwindcss": "^3.4.17",
-    "vite": "^6.0.5"
-  },
-  "resolutions": {
-    "rollup": "npm:@rollup/wasm-node"
+  "scripts": {
+    "start": "NODE_ENV=production.env node app.js",
+    "dev": "nodemon node index.js"
   }
 }
