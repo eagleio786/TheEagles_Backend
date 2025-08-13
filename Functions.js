@@ -277,7 +277,7 @@ const GetProfile = async (req, res) => {
     const profile = await UserProfile.findOne({ walletAddress });
 
     if (!profile) {
-      return res.status(404).json({ 
+      return res.json({ 
         message: "Profile not found" 
       });
     }
@@ -398,22 +398,50 @@ const updateByWallet = async (req, res) => {
   }
 };
 
+// const getAllTrans = async (req, resp) => {
+//  try {
+//   const entries = await notifications
+//     .find({})
+//     .sort({ createdAt: -1 }) // newest first
+//     .limit(20);              // only top 20
+
+//   resp.status(200).json(entries);
+// } catch (error) {
+//   console.error(error);
+//   resp.status(500).json({
+//     error: "Something went wrong while getting transactions",
+//   });
+// }
+
+
+
+
 const getAllTrans = async (req, resp) => {
- try {
-  const entries = await notifications
-    .find({})
-    .sort({ createdAt: -1 }) // newest first
-    .limit(20);              // only top 20
+  try {
+    // Disable caching for this response
+    resp.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    resp.set("Pragma", "no-cache");
+    resp.set("Expires", "0");
 
-  resp.status(200).json(entries);
-} catch (error) {
-  console.error(error);
-  resp.status(500).json({
-    error: "Something went wrong while getting transactions",
-  });
-}
+    // Disable ETag for this response
+    resp.removeHeader("ETag");
 
+    const entries = await notifications
+      .find({})
+      .sort({ createdAt: -1 }) // newest first
+      .limit(20);              // only top 20
+
+    resp.status(200).json(entries);
+  } catch (error) {
+    console.error(error);
+    resp.status(500).json({
+      error: "Something went wrong while getting transactions",
+    });
+  }
 };
+
+
+// };
 
 
 
