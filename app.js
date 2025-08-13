@@ -28,6 +28,7 @@ const ALLOWED_ORIGINS = Array.from(
   new Set([
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://reffaralmoney.com/",
     ...CLIENT_ORIGINS,
   ])
 );
