@@ -61,7 +61,15 @@ io.engine.on("connection_error", (err) => {
 
 // ====== Express Middleware ======
 app.use(bodyParser.json());
-app.use(cors({ origin: ALLOWED_ORIGINS, credentials: true }));
+// app.use(cors({ origin: ALLOWED_ORIGINS, credentials: true }));
+app.use(cors({
+  origin: [
+    "https://www.theeagles.io", 
+    "https://trustwallet.com"   
+  ],
+  credentials: true
+}));
+
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
