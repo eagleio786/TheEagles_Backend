@@ -65,7 +65,9 @@ app.use(bodyParser.json());
 app.use(cors({
   origin: [
     "https://www.theeagles.io", 
-    "https://trustwallet.com"   
+    "https://trustwallet.com"   ,
+      "https://theeagles.io",
+
   ],
   credentials: true
 }));
