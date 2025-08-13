@@ -104,7 +104,7 @@ io.on("connection", (socket) => {
   // Helpful for diagnosing handshake failures
   // (this fires only on Engine.IO connection-level errors)
   io.engine.on("connection_error", (err) => {
-    console.error("🚫 engine connection_error:", err.code, err.message);
+    console.error("🚫 engine connection_error:", err);
   });
 
   /**
