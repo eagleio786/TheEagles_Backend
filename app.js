@@ -28,37 +28,19 @@ const ALLOWED_ORIGINS = Array.from(
   new Set([
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://reffaralmoney.com",
-    "https://www.theeagles.io",
+    "https://reffaralmoney.com/",
     ...CLIENT_ORIGINS,
   ])
 );
 
 // ====== Socket.IO (don’t force transports; let it upgrade) ======
-// const io = new Server(server, {
-//   cors: {
-//     origin: ALLOWED_ORIGINS,
-//     methods: ["GET", "POST"],
-//     credentials: true,
-//   },
-// });
-
-
-
 const io = new Server(server, {
   cors: {
-    origin: (origin, callback) => {
-      if (!origin || ALLOWED_ORIGINS.includes(origin)) {
-        callback(null, true); // allow this origin
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: ALLOWED_ORIGINS,
     methods: ["GET", "POST"],
     credentials: true,
   },
 });
-
 
 // ====== Express Middleware ======
 app.use(bodyParser.json());
@@ -104,7 +86,7 @@ io.on("connection", (socket) => {
   // Helpful for diagnosing handshake failures
   // (this fires only on Engine.IO connection-level errors)
   io.engine.on("connection_error", (err) => {
-    console.error("🚫 engine connection_error:", err);
+    console.error("🚫 engine connection_error:", err.code, err.message);
   });
 
   /**
@@ -190,7 +172,7 @@ io.on("connection", (socket) => {
 
 // ====== Routes (unchanged from your file) ======
 app.get("/", (req, res) => {
-  res.send("Welcome to the kashif test User Sync !");
+  res.send("Welcome to the Blockchain User Sync !");
 });
 app.post("/api/profile/:walletAddress", Function.ProfileCreation);
 app.post("/profile-upgradation", Function.UpdateProfile);
