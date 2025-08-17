@@ -14,37 +14,7 @@ const UserProfileSchema = new mongoose.Schema({
     whatsapp: { type: String },
   },
 });
-const userSchema = new mongoose.Schema(
-  {
-    referrer: {
-      type: String,
-      required: true,
-    },
-    Personal: {
-      type: String,
-      required: true,
-    },
-    id: {
-      type: Number,
-      required: true,
-      unique: true,
-    },
-    currentX1Level: {
-      type: Number,
-      // required: true,
-    },
-    currentX2Level: {
-      type: Number,
-      // required: true,
-    },
-    totalUSDTReceived: {
-      type: String, // Supports large numbers
-      default: 0,
-    },
-    TotalReferred: { type: [Number], default: [] }, // all childs
-  },
-  { timestamps: true }
-);
+
 const transactionSchema = new mongoose.Schema(
   {
     from: {
@@ -75,9 +45,24 @@ const transactionSchema = new mongoose.Schema(
 );
 
 
+const userSchema = new mongoose.Schema({
+  address: { type: String, unique: true, required: true }, // Ethereum address
+  totalTeam: {
+    type: Number,
+    default: 0,
+  },
+  partners: {
+    type: Number,
+    default: 0,
+  },
+}, { timestamps: true });  
+
+
+const User = mongoose.models.User || mongoose.model("User", userSchema);
+
 
 transactionSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 });
 const notifications = mongoose.model("Transaction", transactionSchema);
-const User = mongoose.model("User", userSchema);
+// const User = mongoose.model("User", userSchema);
 const UserProfile = mongoose.model("UserProfile", UserProfileSchema);
 module.exports = { UserProfile, User, notifications };

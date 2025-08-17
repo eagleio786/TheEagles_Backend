@@ -6,7 +6,7 @@ const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
 const mongoose = require("mongoose");
-
+const {Script}=require('./script')
 const { UserProfile, notifications } = require("./Database");
 const Function = require("./Functions");
 const Worker = require("./Worker");
@@ -187,7 +187,7 @@ app.post("/profile-upgradation", Function.UpdateProfile);
 app.get("/user/profile/:walletAddress", Function.GetProfile);
 app.get("/setTrue/:walletAddress", Function.updateByWallet);
 app.get("/transaction-distribution", Function.getAllTrans);
-
+Script()
 // ====== Error Handler ======
 app.use(errorHandler);
 
