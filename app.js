@@ -16,7 +16,7 @@ const app = express();
 const server = http.createServer(app);
 
 // ====== ENV ======
-const PORT = Number(process.env.PORT) || 5001;
+const PORT = Number(process.env.PORT) || 5000;
 const MONGO_URL = process.env.MONGO_URL;
 
 // ====== REST CORS (allow wallet webviews & handle OPTIONS) ======
