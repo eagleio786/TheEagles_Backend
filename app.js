@@ -79,6 +79,11 @@ async function connectToMongo() {
       console.log("🔔 Contract event callback:", params);
       // If needed later: io.to(params?.toAddress?.toLowerCase?.()).emit("contract_event", { params, event });
     });
+    //  const  registeration= await Function.listenToRegisterEvent();
+    // registeration((params, event) => {
+    //   console.log("🔔 Contract event callback:", params);
+    //   // If needed later: io.to(params?.toAddress?.toLowerCase?.()).emit("contract_event", { params, event });
+    // });
   } catch (err) {
     console.error("❌ Mongo connect error:", err?.message || err);
     console.log("⏳ Retrying Mongo connection in 5s…");
@@ -187,6 +192,8 @@ app.post("/profile-upgradation", Function.UpdateProfile);
 app.get("/user/profile/:walletAddress", Function.GetProfile);
 app.get("/setTrue/:walletAddress", Function.updateByWallet);
 app.get("/transaction-distribution", Function.getAllTrans);
+app.get("/partnersTeam/:address",Function.getPartnerandTeam)
+
 Script()
 // ====== Error Handler ======
 app.use(errorHandler);

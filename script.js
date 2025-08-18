@@ -74,7 +74,7 @@ const Script = async () => {
     const totalUsers = await GetCurrentUsers();
     console.log("Total users on-chain:", totalUsers.toString());
 
-    for (let i = 1; i <= Number(totalUsers); i++) {
+    for (let i = 0; i <= Number(totalUsers); i++) {
       const address = await contract.idToAddress(i);
       console.log(`\n--- Traversing upliners for user ${i}: ${address} ---`);
 

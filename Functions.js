@@ -1,4 +1,4 @@
-const { UserProfile, notifications } = require("./Database");
+const { UserProfile, notifications,User } = require("./Database");
 const { ethers } = require("ethers");
 const rpcUrl = "https://bsc-mainnet.infura.io/v3/f5778e9c8b764c2eb60678ad73f25586";
 const eventName = "FundsDistributed";
@@ -401,8 +401,69 @@ const getAllTrans = async (req, resp) => {
   }
 };
 
+//discord
+function listenToRegisterEvent() {
+  let isListening = false;
+  const eventName = "UserRegistered";
+  return async function (callback) {
+    if (isListening) {
+      console.log("⚠️ Already listening to contract event");
+      return;
+    }
+    try {
+            const provider = new ethers.JsonRpcProvider(rpcUrl);
 
-// };
+      const contract = new ethers.Contract(contractAddress, abi, provider);
+
+      contract.on(eventName, async (...args) => {
+        const eventObj = args[args.length - 1];
+        const eventArgs = args.slice(0, -1);
+
+        console.log(`📢 [${eventName}] Event emitted:`, eventArgs);
+        console.log("event object", eventObj);
+
+        try {
+          await traverseUpliners(eventArgs[0]);
+
+          console.log("✅ Event saved:");
+        } catch (saveErr) {
+          console.error("❌ Error saving:", saveErr);
+        }
+
+        if (typeof callback === "function") {
+          callback(eventArgs, eventObj);
+        }
+      });
+
+      isListening = true;
+    } catch (err) {
+      console.error("❌ Error setting up listener for X1/X2:", err);
+    }
+  };
+}
+
+const getPartnerandTeam = async (req, resp) => {
+  try {
+    const { address } = req.params;
+    const user = await User.findOne(
+      { address: address },    );
+
+    if (!user) {
+      return resp.status(400).json({ message: "User not found" });
+    }
+
+    resp.status(200).json({
+      partners: user.partners,
+      totalTeam: user.totalTeam,
+    });
+  } catch (error) {
+    resp.status(500).json({
+      msg: "something went error",
+      error: error,
+    });
+  }
+};
+
 
 
 
@@ -411,6 +472,8 @@ module.exports = {
   ProfileCreation,
   GetProfile,
   listenToContractEvent,
+  listenToRegisterEvent,
   getAllTrans,
+  getPartnerandTeam,
   updateByWallet,
 };
