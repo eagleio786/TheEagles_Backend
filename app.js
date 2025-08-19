@@ -195,8 +195,10 @@ app.get("/setTrue/:walletAddress", Function.updateByWallet);
 app.get("/transaction-distribution", Function.getAllTrans);
 app.get("/partnersTeam/:address",Function.getPartnerandTeam)
 app.get("/api/first-entry",Function.gettingAmtazData)
+setInterval(() => {
+  Id1SchemaFunction();
+}, 24 * 60 * 60 * 1000);
 // ====== Error Handler =====
-Id1SchemaFunction()
 app.use(errorHandler);
 
 // ====== Start & Graceful Shutdown ======

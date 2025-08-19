@@ -7,14 +7,15 @@ yarn-error.log
 /dist
 coverage/
 logs/
+temp_auto_push.bat
 *.log
 *.tsbuildinfo
 
 # Ignore editor files
-.vscode/
 .idea/
 *.swp
 *.swo
 
 # Ignore dependency lock files (optional, unless you want to commit them)
-yarn.lock
+yarn.lock.gitignore
+temp_interactive_push.bat
