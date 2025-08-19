@@ -57,12 +57,36 @@ const userSchema = new mongoose.Schema({
   },
 }, { timestamps: true });  
 
+const AmtazSchema = new mongoose.Schema({
+  TotalProfit: { type: Number, default: 25418 }, // Ethereum address
+  DailyProfit: {
+    type: Number,
+  },
+  partners: {
+    type: Number,
+    default:1289,
+  },
+  Hr24partners: {
+    type: Number,
+  },
+  TeamMembers: {
+    type: Number,
+    default:25445,
+  },
+  hr24TeamMembers: {
+    type: Number,
+  },
+});
+
+const Id1Schema =
+  mongoose.models.AmtazSchema || mongoose.model("AmtazSchema", AmtazSchema); // OK always
+
 
 const User = mongoose.models.User || mongoose.model("User", userSchema);
 
-
+// const Id1Schema=mongoose.models.AmtazSchema
 transactionSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 });
 const notifications = mongoose.model("Transaction", transactionSchema);
 // const User = mongoose.model("User", userSchema);
 const UserProfile = mongoose.model("UserProfile", UserProfileSchema);
-module.exports = { UserProfile, User, notifications };
+module.exports = { UserProfile, User, notifications,Id1Schema };

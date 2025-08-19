@@ -1,39 +1,46 @@
-const { UserProfile, notifications,User } = require("./Database");
+const { UserProfile, notifications, User,Id1Schema } = require("./Database");
 const { ethers } = require("ethers");
-const rpcUrl = "https://bsc-mainnet.infura.io/v3/f5778e9c8b764c2eb60678ad73f25586";
+const rpcUrl =
+  "https://bsc-mainnet.infura.io/v3/f5778e9c8b764c2eb60678ad73f25586";
 const eventName = "FundsDistributed";
-const { abi, contractAddress, X3DiamondAbi, X3DiamondAddress } = require("./exports");
+const {
+  abi,
+  contractAddress,
+  X3DiamondAbi,
+  X3DiamondAddress,
+
+} = require("./exports");
 const { Transaction } = require("ethers");
 const UpdateProfile = async (req, res) => {
   try {
     const { walletAddress, ...updateData } = req.body;
 
     if (!walletAddress) {
-      return res.status(400).json({ 
-        message: "Wallet address is required" 
+      return res.status(400).json({
+        message: "Wallet address is required",
       });
     }
 
-    console.log('Update/Create request for wallet:', walletAddress);
-    console.log('Update data:', updateData);
+    console.log("Update/Create request for wallet:", walletAddress);
+    console.log("Update data:", updateData);
 
     // Update if exists, otherwise create new profile
     const updatedProfile = await UserProfile.findOneAndUpdate(
       { walletAddress },
-      { 
+      {
         $set: {
           ...updateData,
           walletAddress, // Ensure walletAddress is saved if creating
           updatedAt: new Date(),
         },
         $setOnInsert: {
-          createdAt: new Date() // Only set when creating
-        }
+          createdAt: new Date(), // Only set when creating
+        },
       },
-      { 
-        new: true,          // return updated doc
-        upsert: true,       // create if not found
-        runValidators: true // schema validation
+      {
+        new: true, // return updated doc
+        upsert: true, // create if not found
+        runValidators: true, // schema validation
       }
     );
 
@@ -41,39 +48,37 @@ const UpdateProfile = async (req, res) => {
       message: "Profile updated or created successfully!",
       data: updatedProfile,
     });
-
   } catch (error) {
-    console.error('Error updating/creating profile:', error);
+    console.error("Error updating/creating profile:", error);
 
-    if (error.name === 'ValidationError') {
+    if (error.name === "ValidationError") {
       return res.status(400).json({
         message: "Validation error",
-        error: error.message
+        error: error.message,
       });
     }
 
     if (error.code === 11000) {
       return res.status(400).json({
         message: "Duplicate entry error",
-        error: "Profile with this wallet address already exists"
+        error: "Profile with this wallet address already exists",
       });
     }
 
-    res.status(500).json({ 
-      message: "Internal server error", 
-      error: error.message 
+    res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
     });
   }
 };
-
 
 // const UpdateProfile = async (req, res) => {
 //   try {
 //     const { walletAddress, ...updateData } = req.body;
 
 //     if (!walletAddress) {
-//       return res.status(400).json({ 
-//         message: "Wallet address is required" 
+//       return res.status(400).json({
+//         message: "Wallet address is required"
 //       });
 //     }
 
@@ -84,29 +89,29 @@ const UpdateProfile = async (req, res) => {
 //     const existingUser = await UserProfile.findOne({ walletAddress });
 
 //     if (!existingUser) {
-//       return res.status(400).json({ 
-//         message: "Profile not found. Please create a profile first." 
+//       return res.status(400).json({
+//         message: "Profile not found. Please create a profile first."
 //       });
 //     }
 
 //     // Update the user profile
 //     const updatedProfile = await UserProfile.findOneAndUpdate(
 //       { walletAddress },
-//       { 
+//       {
 //         $set: {
 //           ...updateData,
 //           updatedAt: new Date() // Add timestamp
 //         }
 //       },
-//       { 
+//       {
 //         new: true,
 //         runValidators: true // Run schema validators
 //       }
 //     );
 
 //     if (!updatedProfile) {
-//       return res.status(500).json({ 
-//         message: "Failed to update profile" 
+//       return res.status(500).json({
+//         message: "Failed to update profile"
 //       });
 //     }
 
@@ -117,7 +122,7 @@ const UpdateProfile = async (req, res) => {
 
 //   } catch (error) {
 //     console.error('Error updating profile:', error);
-    
+
 //     // Handle specific errors
 //     if (error.name === 'ValidationError') {
 //       return res.status(400).json({
@@ -133,29 +138,28 @@ const UpdateProfile = async (req, res) => {
 //       });
 //     }
 
-//     res.status(500).json({ 
-//       message: "Internal server error", 
-//       error: error.message 
+//     res.status(500).json({
+//       message: "Internal server error",
+//       error: error.message
 //     });
 //   }
 // };
 
 const ProfileCreation = async (req, res) => {
-
   console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-  
+
   try {
-  const {walletAddress}=req.params
-    const {  ...profileData } = req.body;
+    const { walletAddress } = req.params;
+    const { ...profileData } = req.body;
 
     if (!walletAddress) {
-      return res.status(400).json({ 
-        message: "Wallet address is required" 
+      return res.status(400).json({
+        message: "Wallet address is required",
       });
     }
 
-    console.log('Create profile request for wallet:', walletAddress);
-    console.log('Profile data:', profileData);
+    console.log("Create profile request for wallet:", walletAddress);
+    console.log("Profile data:", profileData);
 
     // Check if profile already exists
     const existingUser = await UserProfile.findOne({ walletAddress });
@@ -181,7 +185,7 @@ const ProfileCreation = async (req, res) => {
       id: newId.toString(),
       walletAddress,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
 
     const savedProfile = await newUserProfile.save();
@@ -190,36 +194,35 @@ const ProfileCreation = async (req, res) => {
       message: "User profile created successfully!",
       data: savedProfile,
     });
-
   } catch (error) {
-    console.error('Error creating profile:', error);
+    console.error("Error creating profile:", error);
 
     // Handle specific errors
-    if (error.name === 'ValidationError') {
+    if (error.name === "ValidationError") {
       return res.status(400).json({
         message: "Validation error",
-        error: error.message
+        error: error.message,
       });
     }
 
     if (error.code === 11000) {
       return res.status(400).json({
         message: "Profile already exists for this wallet address!",
-        error: "Duplicate wallet address"
+        error: "Duplicate wallet address",
       });
     }
 
     // Handle image size errors (if you're using express file upload middleware)
-    if (error.code === 'LIMIT_FILE_SIZE') {
+    if (error.code === "LIMIT_FILE_SIZE") {
       return res.status(413).json({
         message: "Image file too large",
-        error: "Please select an image under 1MB"
+        error: "Please select an image under 1MB",
       });
     }
 
-    res.status(500).json({ 
-      message: "Internal server error", 
-      error: error.message 
+    res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
     });
   }
 };
@@ -230,36 +233,31 @@ const GetProfile = async (req, res) => {
     const { walletAddress } = req.params;
 
     if (!walletAddress) {
-      return res.status(400).json({ 
-        message: "Wallet address is required" 
+      return res.status(400).json({
+        message: "Wallet address is required",
       });
     }
 
     const profile = await UserProfile.findOne({ walletAddress });
 
     if (!profile) {
-      return res.json({ 
-        message: "Profile not found" 
+      return res.json({
+        message: "Profile not found",
       });
     }
 
     res.status(200).json({
       message: "Profile retrieved successfully",
-      data: profile
+      data: profile,
     });
-
   } catch (error) {
-    console.error('Error retrieving profile:', error);
-    res.status(500).json({ 
-      message: "Internal server error", 
-      error: error.message 
+    console.error("Error retrieving profile:", error);
+    res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
     });
   }
 };
-
-
-
-
 
 let isListening = false;
 
@@ -269,9 +267,13 @@ function listenToContractEvent() {
       console.log("⚠️ Already listening to contract event");
       return;
     }
- try {
+    try {
       const provider = new ethers.JsonRpcProvider(rpcUrl);
-      const contract = new ethers.Contract(X3DiamondAddress, X3DiamondAbi, provider);
+      const contract = new ethers.Contract(
+        X3DiamondAddress,
+        X3DiamondAbi,
+        provider
+      );
 
       contract.on(eventName, async (...args) => {
         const eventObj = args[args.length - 1];
@@ -340,12 +342,12 @@ function listenToContractEvent() {
 }
 const updateByWallet = async (req, res) => {
   try {
-    const { walletAddress } = req.params; 
+    const { walletAddress } = req.params;
 
     // Update all documents where "from" matches
     const result = await notifications.updateMany(
-      { to: walletAddress },             // match condition
-      { $set: { seen: true } }    // change field
+      { to: walletAddress }, // match condition
+      { $set: { seen: true } } // change field
     );
 
     res.json({
@@ -374,13 +376,13 @@ const updateByWallet = async (req, res) => {
 //   });
 // }
 
-
-
-
 const getAllTrans = async (req, resp) => {
   try {
     // Disable caching for this response
-    resp.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    resp.set(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, proxy-revalidate"
+    );
     resp.set("Pragma", "no-cache");
     resp.set("Expires", "0");
 
@@ -390,7 +392,7 @@ const getAllTrans = async (req, resp) => {
     const entries = await notifications
       .find({})
       .sort({ createdAt: -1 }) // newest first
-      .limit(20);              // only top 20
+      .limit(20); // only top 20
 
     resp.status(200).json(entries);
   } catch (error) {
@@ -401,13 +403,10 @@ const getAllTrans = async (req, resp) => {
   }
 };
 
-
-
 const getPartnerandTeam = async (req, resp) => {
   try {
     const { address } = req.params;
-    const user = await User.findOne(
-      { address: address },    );
+    const user = await User.findOne({ address: address });
 
     if (!user) {
       return resp.status(400).json({ message: "User not found" });
@@ -425,15 +424,27 @@ const getPartnerandTeam = async (req, resp) => {
   }
 };
 
-
-
+const gettingAmtazData = async (req,res) => {
+  try {
+    console.log("👉 calling the api /api/first-entry");
+    const firstEntry = await Id1Schema.findOne({}); // fetch first document
+    if (!firstEntry) {
+      return res.status(404).json({ message: "No entry found" });
+    }
+    res.json(firstEntry.toObject()); // return as plain JSON
+  } catch (error) {
+    console.error("❌ Error fetching first entry:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 
 module.exports = {
-    UpdateProfile,
+  UpdateProfile,
   ProfileCreation,
   GetProfile,
   listenToContractEvent,
   getAllTrans,
   getPartnerandTeam,
+  gettingAmtazData,
   updateByWallet,
 };

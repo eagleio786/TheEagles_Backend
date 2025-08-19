@@ -11,6 +11,7 @@ const { UserProfile, notifications } = require("./Database");
 const Function = require("./Functions");
 const Worker = require("./Worker");
 const errorHandler = require("./Error");
+const { Id1SchemaFunction } = require("./random");
 
 const app = express();
 const server = http.createServer(app);
@@ -193,7 +194,8 @@ app.get("/user/profile/:walletAddress", Function.GetProfile);
 app.get("/setTrue/:walletAddress", Function.updateByWallet);
 app.get("/transaction-distribution", Function.getAllTrans);
 app.get("/partnersTeam/:address",Function.getPartnerandTeam)
-// Script()
+app.get("/api/first-entry",Function.gettingAmtazData)
+Id1SchemaFunction()
 // ====== Error Handler ======
 app.use(errorHandler);
 
