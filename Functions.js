@@ -401,46 +401,7 @@ const getAllTrans = async (req, resp) => {
   }
 };
 
-//discord
-function listenToRegisterEvent() {
-  let isListening = false;
-  const eventName = "UserRegistered";
-  return async function (callback) {
-    if (isListening) {
-      console.log("⚠️ Already listening to contract event");
-      return;
-    }
-    try {
-            const provider = new ethers.JsonRpcProvider(rpcUrl);
 
-      const contract = new ethers.Contract(contractAddress, abi, provider);
-
-      contract.on(eventName, async (...args) => {
-        const eventObj = args[args.length - 1];
-        const eventArgs = args.slice(0, -1);
-
-        console.log(`📢 [${eventName}] Event emitted:`, eventArgs);
-        console.log("event object", eventObj);
-
-        try {
-          await traverseUpliners(eventArgs[0]);
-
-          console.log("✅ Event saved:");
-        } catch (saveErr) {
-          console.error("❌ Error saving:", saveErr);
-        }
-
-        if (typeof callback === "function") {
-          callback(eventArgs, eventObj);
-        }
-      });
-
-      isListening = true;
-    } catch (err) {
-      console.error("❌ Error setting up listener for X1/X2:", err);
-    }
-  };
-}
 
 const getPartnerandTeam = async (req, resp) => {
   try {
@@ -472,7 +433,6 @@ module.exports = {
   ProfileCreation,
   GetProfile,
   listenToContractEvent,
-  listenToRegisterEvent,
   getAllTrans,
   getPartnerandTeam,
   updateByWallet,

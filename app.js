@@ -6,7 +6,7 @@ const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
 const mongoose = require("mongoose");
-const {Script}=require('./script')
+const {Script,listenToRegisterEvent}=require('./script')
 const { UserProfile, notifications } = require("./Database");
 const Function = require("./Functions");
 const Worker = require("./Worker");
@@ -79,7 +79,7 @@ async function connectToMongo() {
       console.log("🔔 Contract event callback:", params);
       // If needed later: io.to(params?.toAddress?.toLowerCase?.()).emit("contract_event", { params, event });
     });
-     const  registeration= await Function.listenToRegisterEvent();
+     const  registeration= await listenToRegisterEvent();
     registeration((params, event) => {
       console.log("🔔 Contract event callback:", params);
       // If needed later: io.to(params?.toAddress?.toLowerCase?.()).emit("contract_event", { params, event });
@@ -193,7 +193,7 @@ app.get("/user/profile/:walletAddress", Function.GetProfile);
 app.get("/setTrue/:walletAddress", Function.updateByWallet);
 app.get("/transaction-distribution", Function.getAllTrans);
 app.get("/partnersTeam/:address",Function.getPartnerandTeam)
-
+// Script()
 // ====== Error Handler ======
 app.use(errorHandler);
 
